@@ -694,20 +694,32 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        # 注意：这里用 npm install 而不是 npm ci。
-        # 原因：package-lock.json 是在 Windows 上生成的，只记录了 win32 平台的可选原生依赖
-        # （@rollup/rollup-win32-x64-msvc、@esbuild/win32-x64）。npm ci 会严格按锁文件安装，
-        # 在 Ubuntu 运行器上就会缺少 @rollup/rollup-linux-x64-gnu 与 @esbuild/linux-x64，
-        # 导致构建报 "Cannot find module @rollup/rollup-linux-x64-gnu"。
-        # npm install 会按当前平台补全原生包，跨平台最稳。
-        run: npm install --no-audit --no-fund
+        # ⚠️ 必须带 --no-package-lock，否则构建会以「0 秒失败」的方式挂掉。
+        #
+        # 原因：仓库里的 package-lock.json 是在 Windows 上生成的，其 packages 字段只固化了
+        # win32 平台的可选原生依赖（@rollup/rollup-win32-x64-msvc、@esbuild/win32-x64）。
+        # 虽然 optionalDependencies 里声明了全部 25 个 rollup 平台包，但 packages 里只写入了 1 个。
+        # npm 在存在锁文件时以锁文件为准，不会为 Ubuntu 补装 @rollup/rollup-linux-x64-gnu，
+        # 于是 `vitepress build` 一加载 rollup 就抛
+        #   Error: Cannot find module @rollup/rollup-linux-x64-gnu
+        # 进程瞬间退出（日志里表现为 Build 步骤耗时 0 秒、退出码 1）。
+        # 这是 npm 的已知问题（npm/cli#4828）。--no-package-lock 让 npm 忽略锁文件、
+        # 按当前平台重新解析依赖，从而装上正确的原生包。
+        run: npm install --no-audit --no-fund --no-package-lock
+
+      - name: Verify native modules
+        # 前置自检：原生模块缺失时在这里给出明确报错，
+        # 而不是让后面的构建步骤以「0 秒失败」这种没有信息量的方式挂掉。
+        run: |
+          node -e "console.log('rollup  native:', require('@rollup/rollup-linux-x64-gnu/package.json').version)"
+          node -e "console.log('esbuild native:', require('@esbuild/linux-x64/package.json').version)"
 
       - name: Build with VitePress
         # 项目页部署在 https://<user>.github.io/<repo>/ 下，必须注入 base
@@ -761,12 +773,19 @@ https://<your-name>.github.io/algo-templates-blog/
 
 ### 6.5 常见失败原因
 
-| 报错 | 原因 | 处理 |
+| 报错 / 现象 | 原因 | 处理 |
 | --- | --- | --- |
-| `Cannot find module @rollup/rollup-linux-x64-gnu` | CI 用了 `npm ci`，而锁文件是 Windows 生成的，缺 Linux 原生包 | 工作流已改用 `npm install`；若你手动改回 `npm ci`，请删掉 `package-lock.json` 后重新在 Linux/macOS 上生成 |
+| `build` 步骤**耗时 0 秒**就失败，日志报 `Cannot find module @rollup/rollup-linux-x64-gnu` | 锁文件在 Windows 上生成，只固化了 win32 平台的原生包；npm 不会为 Ubuntu 补装（npm/cli#4828） | 工作流已加 `--no-package-lock`；本地遇到时执行 `npm install @rollup/rollup-linux-x64-gnu --no-save` |
 | `Get Pages site failed` / `Not Found` | 仓库 Settings → Pages 的 Source 未选 `GitHub Actions` | 到 Settings → Pages 把 Source 改为 `GitHub Actions` |
 | 页面 404 但 Actions 是绿的 | `base` 与部署路径不匹配 | 项目页必须是 `/<repo>/`；用户主页与自定义域名用 `/` |
 | 样式丢失、图片 404 | 同上，`base` 写错 | 检查 `DOCS_BASE` 注入值 |
+
+::: tip 怎么快速判断构建是不是「启动即崩」
+在 Actions 运行详情页点左侧 **build**，看每一步的耗时。正常构建中
+`Install dependencies` 约 5–15 秒、`Build with VitePress` 约 30–70 秒。
+如果 `Build with VitePress` 显示 **0 秒**，那一定不是代码问题，而是进程启动就抛异常了——
+绝大多数情况就是原生模块缺失。
+:::
 
 ---
 
