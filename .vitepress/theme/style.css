@@ -1,0 +1,118 @@
+/* .vitepress/theme/style.css
+ * 自定义样式：品牌色、代码块/代码组增强、表格与提示块微调。
+ * 全部基于 VitePress 内置 CSS 变量，自动适配浅色与深色模式。
+ */
+
+/* ---------------- 品牌色 ---------------- */
+:root {
+  --vp-c-brand-1: #3451b2;
+  --vp-c-brand-2: #3a5ccc;
+  --vp-c-brand-3: #5672cd;
+  --vp-c-brand-soft: rgba(100, 108, 255, 0.14);
+
+  /* 正文与代码区域稍宽，方便阅读较长的模板代码 */
+  --vp-layout-max-width: 1600px;
+}
+
+.dark {
+  --vp-c-brand-1: #a8b1ff;
+  --vp-c-brand-2: #5c73e7;
+  --vp-c-brand-3: #3e63dd;
+  --vp-c-brand-soft: rgba(100, 108, 255, 0.16);
+}
+
+/* ---------------- 代码块 ---------------- */
+.vp-doc div[class*='language-'] {
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+/* 代码块右上角的语言标识 */
+.vp-doc div[class*='language-'] > span.lang {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+/* 复制按钮：悬停时淡入，复制成功后显示对勾（默认主题已内置逻辑） */
+.vp-doc div[class*='language-'] > button.copy {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-soft);
+  transition: opacity 0.25s, border-color 0.25s, background-color 0.25s;
+}
+
+.vp-doc div[class*='language-'] > button.copy:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+/* 代码字体：优先使用等宽字体栈 */
+.vp-doc [class*='language-'] code,
+.vp-doc [class*='language-'] pre {
+  font-family: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ---------------- 代码组（::: code-group）标签 ---------------- */
+.vp-doc .vp-code-group .tabs {
+  border-radius: 10px 10px 0 0;
+}
+
+.vp-doc .vp-code-group .tabs label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.vp-doc .vp-code-group .tabs input:checked + label {
+  color: var(--vp-c-brand-1);
+}
+
+/* ---------------- 表格 ---------------- */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 600;
+}
+
+/* ---------------- 提示块 ---------------- */
+.vp-doc .custom-block {
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+/* ---------------- 首页 hero ---------------- */
+.VPHero .name,
+.VPHero .text {
+  letter-spacing: -0.02em;
+}
+
+.VPHero .tagline {
+  line-height: 1.7;
+}
+
+/* ---------------- 侧边栏：分类分组更醒目 ---------------- */
+.VPSidebarItem.level-0 > .item > .text {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* ---------------- 正文标题 ---------------- */
+.vp-doc h2 {
+  margin-top: 40px;
+  padding-top: 22px;
+}
+
+.vp-doc h3 {
+  margin-top: 28px;
+}

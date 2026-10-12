@@ -1,0 +1,14 @@
+# 统一按 LF 存储，避免 Windows / macOS 之间来回切换时产生整文件 diff
+* text=auto eol=lf
+
+# 二进制资源不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# GitHub 语言统计：把本仓库标记为 TypeScript/Vue 项目，忽略 Markdown 占比
+*.md linguist-documentation
