@@ -197,7 +197,7 @@ export default defineConfig({
         ]
       },
       { text: '使用说明', link: '/guide' },
-      { text: 'GitHub', link: 'https://github.com/your-name/algo-templates-blog' }
+      { text: 'GitHub', link: 'https://github.com/HK-Anth/algo-templates-blog' }
     ],
 
     /* 侧边栏按 templates/ 下的分类目录分组 */
@@ -334,7 +334,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/your-name/algo-templates-blog' }
+      { icon: 'github', link: 'https://github.com/HK-Anth/algo-templates-blog' }
     ]
 
     // 注意：纯静态站点，不配置 editLink 等后台入口，
