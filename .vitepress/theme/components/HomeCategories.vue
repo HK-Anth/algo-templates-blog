@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 首页「模板分类入口」组件：数据来自构建时扫描 templates/ 的 frontmatter。
 import { computed } from 'vue'
+import { withBase } from 'vitepress'
 import { data as templates } from '../templates.data'
 
 interface CategoryMeta {
@@ -40,7 +41,7 @@ const total = computed(() => templates.length)
 
     <div class="home-cats__grid">
       <div v-for="g in groups" :key="g.key" class="cat-card">
-        <a class="cat-card__head" :href="g.key ? `/templates/${g.key}/` : '/templates/'">
+        <a class="cat-card__head" :href="withBase(`/templates/${g.key}/`)">
           <span class="cat-card__badge">{{ g.badge }}</span>
           <span class="cat-card__name">{{ g.name }}</span>
           <span class="cat-card__count">{{ g.count }}</span>
@@ -48,7 +49,7 @@ const total = computed(() => templates.length)
         <p class="cat-card__desc">{{ g.desc }}</p>
         <ul class="cat-card__list">
           <li v-for="item in g.items" :key="item.url">
-            <a :href="item.url">{{ item.title }}</a>
+            <a :href="withBase(item.url)">{{ item.title }}</a>
           </li>
           <li v-if="g.items.length === 0" class="cat-card__empty">暂无模板</li>
         </ul>
@@ -56,7 +57,7 @@ const total = computed(() => templates.length)
     </div>
 
     <p class="home-cats__more">
-      <a href="/templates/">浏览全部模板 &rarr;</a>
+      <a :href="withBase('/templates/')">浏览全部模板 &rarr;</a>
     </p>
   </section>
 </template>

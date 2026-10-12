@@ -832,6 +832,41 @@ git push
    可改为 `false` 或自行配置重写规则。
 5. **`ignoreDeadLinks: false`**  
    构建时严格校验内链，侧边栏指向不存在的文件会直接构建失败——这对长期维护的模板库是好事。
+6. **自定义组件里的链接必须用 `withBase()` 包一层** ⚠️  
+   VitePress 只会给**静态** Markdown 链接和主题内置链接自动加 `base` 前缀。
+   在 Vue 组件里用**动态绑定**写的 `:href="item.url"` 不会被处理，
+   部署到 GitHub Pages 的子路径时会缺少 `/algo-templates-blog` 前缀，点击直接 404。
+   正确写法：
+
+   ```vue
+   <script setup lang="ts">
+   import { withBase } from 'vitepress'
+   </script>
+
+   <template>
+     <a :href="withBase(item.url)">链接文字</a>
+   </template>
+   ```
+
+   这个 bug 在本地开发时**看不出来**（本地 `base` 是 `/`，加不加前缀都一样），
+   只有部署到子路径才暴露。验证方法：
+
+   ```bash
+   # Windows Git Bash 要加 MSYS_NO_PATHCONV，否则 /xxx/ 会被转换成 Windows 路径
+   MSYS_NO_PATHCONV=1 DOCS_BASE='/algo-templates-blog/' npm run docs:build
+   # 然后检查产物里有没有不带前缀的 href
+   grep -o 'href="/[^"]*"' .vitepress/dist/index.html | grep -v '/algo-templates-blog'
+   ```
+
+   PowerShell 下直接写：
+
+   ```powershell
+   $env:DOCS_BASE = '/algo-templates-blog/'
+   npm run docs:build
+   ```
+7. **导航栏 / 社交链接里的用户名要替换**  
+   `themeConfig.nav` 与 `themeConfig.socialLinks` 中的 `https://github.com/<用户名>/<仓库>` 
+   是硬编码的。忘了替换不会导致构建失败，但访客点击会 404。
 
 ---
 

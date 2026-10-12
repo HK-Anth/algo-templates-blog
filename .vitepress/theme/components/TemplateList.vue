@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 模板总览 / 分类页列表组件：同样消费 templates.data.ts 的构建时数据。
 import { computed } from 'vue'
+import { withBase } from 'vitepress'
 import { data as templates } from '../templates.data'
 
 const props = defineProps<{ category?: string }>()
@@ -58,7 +59,7 @@ const total = computed(() =>
       <div class="tpl-grid">
         <article v-for="item in g.items" :key="item.url" class="tpl-card">
           <h3 class="tpl-card__title">
-            <a :href="item.url">{{ item.title }}</a>
+            <a :href="withBase(item.url)">{{ item.title }}</a>
           </h3>
           <p v-if="item.description" class="tpl-card__desc">{{ item.description }}</p>
           <div class="tpl-card__meta">
