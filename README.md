@@ -701,7 +701,13 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        run: npm ci
+        # 注意：这里用 npm install 而不是 npm ci。
+        # 原因：package-lock.json 是在 Windows 上生成的，只记录了 win32 平台的可选原生依赖
+        # （@rollup/rollup-win32-x64-msvc、@esbuild/win32-x64）。npm ci 会严格按锁文件安装，
+        # 在 Ubuntu 运行器上就会缺少 @rollup/rollup-linux-x64-gnu 与 @esbuild/linux-x64，
+        # 导致构建报 "Cannot find module @rollup/rollup-linux-x64-gnu"。
+        # npm install 会按当前平台补全原生包，跨平台最稳。
+        run: npm install --no-audit --no-fund
 
       - name: Build with VitePress
         # 项目页部署在 https://<user>.github.io/<repo>/ 下，必须注入 base
@@ -752,6 +758,15 @@ https://<your-name>.github.io/algo-templates-blog/
 | Vercel / Netlify                              | `/`                         |
 
 `base` 写错的典型症状：页面能打开但**样式全丢、图片 404**。
+
+### 6.5 常见失败原因
+
+| 报错 | 原因 | 处理 |
+| --- | --- | --- |
+| `Cannot find module @rollup/rollup-linux-x64-gnu` | CI 用了 `npm ci`，而锁文件是 Windows 生成的，缺 Linux 原生包 | 工作流已改用 `npm install`；若你手动改回 `npm ci`，请删掉 `package-lock.json` 后重新在 Linux/macOS 上生成 |
+| `Get Pages site failed` / `Not Found` | 仓库 Settings → Pages 的 Source 未选 `GitHub Actions` | 到 Settings → Pages 把 Source 改为 `GitHub Actions` |
+| 页面 404 但 Actions 是绿的 | `base` 与部署路径不匹配 | 项目页必须是 `/<repo>/`；用户主页与自定义域名用 `/` |
+| 样式丢失、图片 404 | 同上，`base` 写错 | 检查 `DOCS_BASE` 注入值 |
 
 ---
 
