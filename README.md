@@ -135,28 +135,35 @@ algo-templates-blog/
 ```ts
 import { defineConfig } from 'vitepress'
 
+/**
+ * 站点根路径。
+ * 部署到 GitHub Pages 项目页（https://<user>.github.io/<repo>/）时必须是 "/<repo>/"，
+ * 否则静态资源会 404。这里从环境变量 DOCS_BASE 读取（CI 中由 workflow 注入），
+ * 本地开发与 Vercel 部署时保持 "/"。
+ *
+ * 也可以直接写死：const base = '/algo-templates-blog/'
+ */
+const base = process.env.DOCS_BASE || '/'
+
 export default defineConfig({
   /* ---------------- 站点基础信息 ---------------- */
   lang: 'zh-CN',
   title: 'Algo Templates',
   description: '个人算法竞赛模板博客 —— C++ / Python 双语言模板库，支持全文搜索、代码标签切换与一键复制',
 
-  /**
-   * 部署到 GitHub Pages 的项目页（https://<user>.github.io/<repo>/）时，base 必须是 "/<repo>/"，
-   * 否则静态资源会 404。这里默认从环境变量 DOCS_BASE 读取（CI 中由 workflow 注入），
-   * 本地开发与 Vercel 部署时保持 "/"。
-   *
-   * 也可以直接写死：base: '/algo-templates-blog/',
-   */
-  base: process.env.DOCS_BASE || '/',
+  base,
 
   /* ---------------- 构建行为 ---------------- */
   cleanUrls: true,        // 生成 /templates/data-structure/dsu 而不是 dsu.html
-  lastUpdated: true,      // 基于 git 提交时间显示"最后更新于"
+  lastUpdated: true,      // 基于 git 提交时间显示“最后更新于”
   ignoreDeadLinks: false, // 严格校验内链，避免出现死链
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    /**
+     * ⚠️ head 里的资源路径 VitePress **不会**自动补 base（与 themeConfig.logo 不同），
+     * 必须自己拼上，否则部署到子路径后 favicon 会 404。
+     */
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}favicon.svg` }],
     ['meta', { name: 'theme-color', content: '#3451b2' }],
     ['meta', { name: 'author', content: 'Algo Templates' }],
     ['meta', {
